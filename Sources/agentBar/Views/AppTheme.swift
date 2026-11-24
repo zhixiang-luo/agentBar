@@ -37,8 +37,15 @@ enum AppAppearanceMode: String, Codable, CaseIterable, Identifiable {
 struct ThemePalette {
     let isDark: Bool
 
-    init(colorScheme: ColorScheme) {
-        self.isDark = (colorScheme == .dark)
+    init(colorScheme: ColorScheme, appearanceMode: AppAppearanceMode = .system) {
+        switch appearanceMode {
+        case .light:
+            self.isDark = false
+        case .dark:
+            self.isDark = true
+        case .system:
+            self.isDark = (colorScheme == .dark)
+        }
     }
 
     /// 面板底色（与 NSVisualEffectView 配合，浅色通透亮白，深色沉静通透）
@@ -122,19 +129,22 @@ struct ThemePalette {
     }
 }
 
-/// 真正的 macOS 原生毛玻璃背景桥接（NSVisualEffectView），并同步配置更圆润的窗口圆角与顶部锚定回缩
+/// 真正的 macOS 原生毛玻璃背景桥接（NSVisualEffectView），同步外观主题与顶部锚定回缩
 struct VisualEffectBackground: NSViewRepresentable {
     let material: NSVisualEffectView.Material
     let blendingMode: NSVisualEffectView.BlendingMode
+    let appearanceMode: AppAppearanceMode
     let targetWindowHeight: CGFloat?
 
     init(
         material: NSVisualEffectView.Material = .popover,
         blendingMode: NSVisualEffectView.BlendingMode = .behindWindow,
+        appearanceMode: AppAppearanceMode = .system,
         targetWindowHeight: CGFloat? = nil
     ) {
         self.material = material
         self.blendingMode = blendingMode
+        self.appearanceMode = appearanceMode
         self.targetWindowHeight = targetWindowHeight
     }
 
@@ -142,6 +152,7 @@ struct VisualEffectBackground: NSViewRepresentable {
         let view = NSVisualEffectView()
         view.material = material
         view.blendingMode = blendingMode
+        view.appearance = appearanceMode.nsAppearance
         view.state = .active
         return view
     }
@@ -149,20 +160,24 @@ struct VisualEffectBackground: NSViewRepresentable {
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
         nsView.material = material
         nsView.blendingMode = blendingMode
+        nsView.appearance = appearanceMode.nsAppearance
         nsView.state = .active
 
-        if let window = nsView.window, let targetHeight = targetWindowHeight, targetHeight > 80 {
-            let currentFrame = window.frame
-            let delta = targetHeight - currentFrame.height
-            if abs(delta) > 1.5 {
-                let newFrame = NSRect(
-                    x: currentFrame.origin.x,
-                    y: currentFrame.maxY - targetHeight,
-                    width: currentFrame.width,
-                    height: targetHeight
-                )
-                DispatchQueue.main.async {
-                    window.setFrame(newFrame, display: true, animate: false)
+        if let window = nsView.window {
+            window.appearance = appearanceMode.nsAppearance
+            if let targetHeight = targetWindowHeight, targetHeight > 80 {
+                let currentFrame = window.frame
+                let delta = targetHeight - currentFrame.height
+                if abs(delta) > 1.5 {
+                    let newFrame = NSRect(
+                        x: currentFrame.origin.x,
+                        y: currentFrame.maxY - targetHeight,
+                        width: currentFrame.width,
+                        height: targetHeight
+                    )
+                    DispatchQueue.main.async {
+                        window.setFrame(newFrame, display: true, animate: false)
+                    }
                 }
             }
         }

@@ -54,6 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // 仅常驻顶部菜单栏，不占用程序坞（Dock）图标
         NSApp.setActivationPolicy(.accessory)
+        NSApp.appearance = ConfigStore.shared.loadConfig().appearanceMode.nsAppearance
     }
 }
 

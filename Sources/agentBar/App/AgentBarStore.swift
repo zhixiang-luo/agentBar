@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SwiftUI
 
@@ -22,6 +23,7 @@ final class AgentBarStore: ObservableObject {
         self.config = store.loadConfig()
         self.customProviders = store.loadCustomProviders()
         self.claudeHookInstalled = ClaudeHookInstaller.isInstalled
+        NSApp?.appearance = self.config.appearanceMode.nsAppearance
         if autoStart {
             scheduleAutoRefresh()
             Task {
@@ -144,6 +146,7 @@ final class AgentBarStore: ObservableObject {
     func saveConfig() {
         ensureOrderContainsAllProviders()
         store.saveConfig(config)
+        NSApp?.appearance = config.appearanceMode.nsAppearance
         SettingsWindowController.shared.applyAppearance(config.appearanceMode)
         applyOrderingToSnapshots()
         scheduleAutoRefresh()

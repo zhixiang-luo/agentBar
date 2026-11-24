@@ -6,7 +6,7 @@ struct MenuBarPopoverView: View {
     @ObservedObject var store: AgentBarStore
 
     private var theme: ThemePalette {
-        ThemePalette(colorScheme: colorScheme)
+        ThemePalette(colorScheme: colorScheme, appearanceMode: store.config.appearanceMode)
     }
 
     // 默认舒适展示最多 3 张平台卡片（约 520pt），超过 3 张自动出现滚动条
@@ -54,6 +54,7 @@ struct MenuBarPopoverView: View {
                 VisualEffectBackground(
                     material: .popover,
                     blendingMode: .behindWindow,
+                    appearanceMode: store.config.appearanceMode,
                     targetWindowHeight: clampedBodyHeight + chromeHeight
                 )
                 theme.canvasTint

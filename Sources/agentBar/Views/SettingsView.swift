@@ -46,7 +46,7 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
 
     private var theme: ThemePalette {
-        ThemePalette(colorScheme: colorScheme)
+        ThemePalette(colorScheme: colorScheme, appearanceMode: store.config.appearanceMode)
     }
 
     var body: some View {
@@ -680,7 +680,7 @@ struct CustomProviderEditorSheet: View {
     let onCancel: () -> Void
 
     private var theme: ThemePalette {
-        ThemePalette(colorScheme: colorScheme)
+        ThemePalette(colorScheme: colorScheme, appearanceMode: store.config.appearanceMode)
     }
 
     var body: some View {
