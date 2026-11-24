@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agentBar 原生极简 UI 交互原型</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 28px 20px 48px;
+      line-height: 1.5;
+    }
+    .container { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+    .toolbar {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .toolbar h1 { font-size: 16px; font-weight: 700; }
+    .toolbar p { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .seg {
+      display: inline-flex;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 9px;
+      border: 1px solid #e2e8f0;
+    }
+    .btn {
+      border: none;
+      background: transparent;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+    }
+    .btn.active { background: #2563eb; color: #ffffff; font-weight: 600; }
+    .btn-outline {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #334155;
+      cursor: pointer;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px; }
+    .stage {
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stage-light { background: linear-gradient(135deg, #dbeafe 0%, #fce7f3 52%, #fef3c7 100%); }
+    .stage-dark { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #172554 100%); }
+    .stage-top {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .pill-tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+    }
+    .menubar-sim {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      backdrop-filter: blur(12px);
+    }
+    .popover { width: 332px; border-radius: 14px; overflow: hidden; }
+    .pop-light {
+      background: rgba(246, 247, 250, 0.92);
+      backdrop-filter: blur(26px);
+      border: 1px solid rgba(15, 23, 42, 0.09);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
+      color: #111827;
+    }
+    .pop-dark {
+      background: rgba(28, 31, 38, 0.92);
+      backdrop-filter: blur(26px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.5);
+      color: #f3f4f6;
+    }
+    .pop-header, .pop-footer {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pop-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .card { border-radius: 14px; padding: 13px; }
+    .card-light { background: rgba(255,255,255,0.94); border: 1px solid rgba(15,23,42,0.07); box-shadow: 0 1px 3px rgba(15,23,42,0.04); }
+    .card-dark { background: rgba(255,255,255,0.065); border: 1px solid rgba(255,255,255,0.09); }
+    .track { width: 100%; height: 6px; border-radius: 999px; overflow: hidden; }
+    .track-light { background: rgba(15,23,42,0.085); }
+    .track-dark { background: rgba(255,255,255,0.11); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+    .icon-box {
+      width: 22px; height: 22px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 11px;
+    }
+    .icon-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="toolbar">
+      <div>
+        <h1>agentBar · macOS 原生极简 UI 交互原型（纯中文）</h1>
+        <p>单图标菜单栏 · 顶栏仅保留刷新与设置 · 默认展示 3 个平台，超出自动滚动 · 支持拖拽排序与浅色/深色双主题</p>
+      </div>
+      <div class="controls">
+        <div class="seg">
+          <button id="btnActive" class="btn active" onclick="setMode('active')">已同步额度态</button>
+          <button id="btnEmpty" class="btn" onclick="setMode('empty')">首次引导态</button>
+        </div>
+        <button id="btnUsed" class="btn-outline" onclick="toggleUsed()">当前：显示剩余 %</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="stage stage-light">
+        <div class="stage-top">
+          <span class="pill-tag" style="background:rgba(255,255,255,0.8);color:#334155;">☀️ 浅色模式（默认）</span>
+          <div class="menubar-sim" style="background:rgba(255,255,255,0.8);color:#111827;">
+            <span style="width:24px;height:20px;border-radius:5px;background:rgba(15,23,42,0.08);display:inline-flex;align-items:center;justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+            </span>
+            <span style="font-variant-numeric:tabular-nums;font-weight:500;">10:45</span>
+          </div>
+        </div>
+        <div id="popLight" class="popover pop-light"></div>
+      </div>
+
+      <div class="stage stage-dark">
+        <div class="stage-top">
+          <span class="pill-tag" style="background:rgba(255,255,255,0.12);color:#e2e8f0;">🌙 深色模式（可选 / 跟随系统）</span>
+          <div class="menubar-sim" style="background:rgba(0,0,0,0.45);color:#f8fafc;border:1px solid rgba(255,255,255,0.12);">
+            <span style="width:24px;height:20px;border-radius:5px;background:rgba(255,255,255,0.16);display:inline-flex;align-items:center;justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+            </span>
+            <span style="font-variant-numeric:tabular-nums;font-weight:500;">22:30</span>
+          </div>
+        </div>
+        <div id="popDark" class="popover pop-dark"></div>
+      </div>
+    </div>
+
+    <div class="icon-section">
+      <img src="../assets/logo.png" width="72" height="72" alt="agentBar 浅色系小猪 App 图标" style="border-radius:16px;" />
+      <div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">浅色系小猪 App 图标（仅用于安装包图标）</div>
+        <div style="font-size:12px;color:#475569;">
+          暖白浅粉圆耳小猪 + 白玉双层绿黄进度条，仅作为桌面安装包图标使用；下拉面板与设置窗口内部完全克制，不堆叠品牌 Logo。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let mode = 'active';
+    let showUsed = false;
+
+    const agents = [
+      {
+        name: 'Codex', tag: 'Plus 订阅', dot: '#10A37F',
+        windows: [
+          { label: '5 小时额度', used: 5, reset: '1 小时 57 分钟后重置' },
+          { label: '周额度', used: 80, reset: '周三 22:33 重置' }
+        ]
+      },
+      {
+        name: 'Antigravity（反重力）', tag: '官方 CLI', dot: '#3B82F6',
+        windows: [
+          { label: '5 小时额度', used: 39, reset: '3 小时 4 分钟后重置' },
+          { label: '周额度', used: 10, reset: '周二 08:50 重置' }
+        ]
+      },
+      {
+        name: 'DeepSeek', tag: 'API 余额', dot: '#4D6BFE',
+        windows: [
+          { label: '账户可用余额（CNY）', isBalance: true, text: '¥36.80', pct: 44, reset: '充值 ¥35.00 · 赠送 ¥1.80' }
+        ]
+      }
+    ];
+
+    function colorOf(remain, dark) {
+      if (remain <= 20) return dark ? '#F87171' : '#DC2626';
+      if (remain <= 50) return dark ? '#FBBF24' : '#D97706';
+      return dark ? '#34D399' : '#16A34A';
+    }
+
+    function render(dark) {
+      const div = dark ? 'rgba(255,255,255,0.085)' : 'rgba(15,23,42,0.075)';
+      const pill = dark ? 'rgba(255,255,255,0.09)' : 'rgba(15,23,42,0.055)';
+      const muted = dark ? '#8E99A8' : '#6B7280';
+      const sec = dark ? '#CBD5E1' : '#4B5563';
+      const cardCls = dark ? 'card card-dark' : 'card card-light';
+      const trackCls = dark ? 'track track-dark' : 'track track-light';
+
+      const body = mode === 'active'
+        ? agents.map(a => `
+            <div class="${cardCls}">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <span style="width:7.5px;height:7.5px;border-radius:99px;background:${a.dot};display:inline-block;"></span>
+                  <span style="font-size:13px;font-weight:600;">${a.name}</span>
+                </div>
+                <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${pill};color:${muted};">${a.tag}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                ${a.windows.map(w => {
+                  const remain = w.isBalance ? w.pct : (100 - w.used);
+                  const width = w.isBalance ? w.pct : (showUsed ? w.used : remain);
+                  const val = w.isBalance ? w.text : (showUsed ? `已用 ${w.used}%` : `剩余 ${remain}%`);
+                  const col = colorOf(remain, dark);
+                  return `
+                    <div style="display:flex;flex-direction:column;gap:5px;">
+                      <div style="display:flex;justify-content:space-between;font-size:12px;">
+                        <span style="color:${sec};">${w.label}</span>
+                        <span style="font-weight:600;font-variant-numeric:tabular-nums;color:${col};">${val}</span>
+                      </div>
+                      <div class="${trackCls}"><div class="fill" style="width:${width}%;background:${col};"></div></div>
+                      <div style="font-size:10.5px;color:${muted};">${w.reset}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `).join('')
+        : `<div class="${cardCls}" style="display:flex;flex-direction:column;gap:10px;">
+             <div>
+               <div style="font-size:13px;font-weight:600;">快速接入你的 AI 平台</div>
+               <div style="font-size:11px;color:${muted};margin-top:2px;">自动探测本机已登录工具，也可通过预设模板 10 秒导入</div>
+             </div>
+             <div style="border-top:0.5px solid ${div};padding-top:8px;display:flex;flex-direction:column;gap:8px;font-size:12px;">
+               <div style="display:flex;justify-content:space-between;"><span>Codex / Claude Code</span><span style="color:#10A37F;font-weight:600;">去开启</span></div>
+               <div style="display:flex;justify-content:space-between;"><span>Antigravity（反重力）</span><span style="color:#3B82F6;font-weight:600;">复制命令</span></div>
+               <div style="display:flex;justify-content:space-between;"><span>DeepSeek / Cursor</span><span style="color:#4D6BFE;font-weight:600;">填密钥</span></div>
+               <div style="display:flex;justify-content:space-between;"><span>硅基流动 / Kimi / OpenCode</span><span style="color:#EC4899;font-weight:600;">+ 导入</span></div>
+             </div>
+           </div>`;
+
+      return `
+        <div class="pop-header" style="border-bottom:0.5px solid ${div};">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.8"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+            <span style="font-size:13px;font-weight:600;">agentBar</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:${muted};">
+            <span>刚刚更新</span>
+            <span class="icon-box" style="background:${pill};color:${sec};">↻</span>
+            <span class="icon-box" style="background:${pill};color:${sec};">⚙</span>
+          </div>
+        </div>
+        <div class="pop-body">${body}</div>
+        <div class="pop-footer" style="border-top:0.5px solid ${div};font-size:11px;color:${muted};">
+          <span style="padding:3px 8px;border-radius:6px;background:${pill};color:${sec};">${showUsed ? '显示：已用' : '显示：剩余'}</span>
+          <span>+ 导入平台  ·  退出</span>
+        </div>
+      `;
+    }
+
+    function update() {
+      document.getElementById('popLight').innerHTML = render(false);
+      document.getElementById('popDark').innerHTML = render(true);
+      document.getElementById('btnActive').className = mode === 'active' ? 'btn active' : 'btn';
+      document.getElementById('btnEmpty').className = mode === 'empty' ? 'btn active' : 'btn';
+      document.getElementById('btnUsed').textContent = showUsed ? '当前：显示已用 %' : '当前：显示剩余 %';
+    }
+    function setMode(m) { mode = m; update(); }
+    function toggleUsed() { showUsed = !showUsed; update(); }
+    update();
+  </script>
+</body>
+</html>
