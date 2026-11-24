@@ -65,9 +65,24 @@
 
 ## 使用方法
 
-### 1. 安装与运行（macOS 14+）
+### 1. 下载与安装（macOS 14+）
 
-> 从源码编译仅需 Apple **Command Line Tools**，无需安装完整版 Xcode。
+#### 方式一：直接下载安装包（推荐，开箱即用）
+
+前往 [**Releases 页面**](https://github.com/zhixiang-luo/agentBar/releases/latest) 下载最新版本：
+
+- **`.dmg` 安装包（推荐）**：下载 `agentBar-v0.2.0-macos.dmg`，双击打开后将 **小猪图标（`agentBar.app`）拖入右侧 `Applications` 文件夹** 即可完成安装；
+- **`.zip` 绿色免安装版**：下载 `agentBar-v0.2.0-macos.zip`，解压后直接双击 `agentBar.app` 运行。
+
+> **首次打开安全提示**：由于本开源项目目前未购买 Apple Developer 年费公证证书，macOS 首次启动时可能会提示「无法验证开发者」或「已损坏」。只需在终端执行一次以下命令解除下载隔离标记，然后正常双击打开即可：
+> ```bash
+> xattr -cr /Applications/agentBar.app
+> ```
+> （若直接解压在下载目录运行，把路径换成你解压后的 `agentBar.app` 路径即可。）
+
+#### 方式二：从源码编译（开发者）
+
+> 仅需 Apple **Command Line Tools**，无需安装完整版 Xcode。
 
 ```bash
 git clone https://github.com/zhixiang-luo/agentBar.git
@@ -79,7 +94,10 @@ cd agentBar
 # 2. 编译 Release 并打包带小猪图标的独立应用（dist/agentBar.app）
 ./scripts/build-app.sh
 
-# 3. 绿色运行或安装到「应用程序」目录
+# 3. 打包 DMG 与 ZIP 发布产物（可选）
+./scripts/package-release.sh 0.2.0
+
+# 4. 安装到「应用程序」目录并启动
 cp -R dist/agentBar.app /Applications/
 open /Applications/agentBar.app
 ```
