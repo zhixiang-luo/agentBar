@@ -147,11 +147,18 @@ func jsonPathExtraction() throws {
     #expect(abs((value ?? 0) - 18.80) < 0.001)
 }
 
-@Test("中文重置倒计时格式化")
+@Test("中文重置倒计时格式化（小时/天+小时/月度剩余天数）")
 func chineseResetCountdownFormatting() {
     let base = Date(timeIntervalSince1970: 1_763_900_000)
+
     let inThreeHours = base.addingTimeInterval(3 * 3600 + 18 * 60)
-    #expect(QuotaTimeFormatter.resetDescription(for: inThreeHours, now: base) == "3 小时 18 分钟后重置")
+    #expect(QuotaTimeFormatter.resetDescription(for: inThreeHours, now: base) == "还剩 3 小时 18 分钟重置")
+
+    let inTwoDaysThreeHours = base.addingTimeInterval((2 * 24 + 3) * 3600 + 10 * 60)
+    #expect(QuotaTimeFormatter.resetDescription(for: inTwoDaysThreeHours, now: base, windowLabel: "周额度") == "还剩 2 天 3 小时重置")
+
+    let inFifteenDays = base.addingTimeInterval(15 * 24 * 3600)
+    #expect(QuotaTimeFormatter.resetDescription(for: inFifteenDays, now: base, windowLabel: "月度额度") == "本月还剩 15 天重置")
 
     let inTwentySeconds = base.addingTimeInterval(20)
     #expect(QuotaTimeFormatter.resetDescription(for: inTwentySeconds, now: base) == "即将重置")

@@ -178,7 +178,11 @@ struct AgentQuotaSnapshot: Identifiable, Equatable {
 }
 
 enum QuotaTimeFormatter {
-    static func resetDescription(for date: Date?, now: Date = Date()) -> String? {
+    static func resetDescription(
+        for date: Date?,
+        now: Date = Date(),
+        windowLabel: String? = nil
+    ) -> String? {
         guard let date else { return nil }
         let interval = date.timeIntervalSince(now)
         if interval <= 60 {
@@ -186,33 +190,33 @@ enum QuotaTimeFormatter {
         }
 
         let totalMinutes = Int(interval / 60)
-        let hours = totalMinutes / 60
+        let totalHours = totalMinutes / 60
         let minutes = totalMinutes % 60
+        let days = totalHours / 24
+        let remHours = totalHours % 24
+        let isMonthly = (windowLabel ?? "").contains("月")
 
-        if hours < 24 {
-            if hours == 0 {
-                return "\(minutes) 分钟后重置"
+        // 月度周期（>= 1 天）：直接显示“本月还剩 X 天重置”
+        if isMonthly && days >= 1 {
+            let displayDays = remHours >= 12 ? days + 1 : days
+            return "本月还剩 \(displayDays) 天重置"
+        }
+
+        if totalHours < 24 {
+            if totalHours == 0 {
+                return "还剩 \(minutes) 分钟重置"
             } else if minutes == 0 {
-                return "\(hours) 小时后重置"
+                return "还剩 \(totalHours) 小时重置"
             } else {
-                return "\(hours) 小时 \(minutes) 分钟后重置"
+                return "还剩 \(totalHours) 小时 \(minutes) 分钟重置"
             }
         }
 
-        let calendar = Calendar.current
-        let weekdayNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
-        let weekdayIndex = calendar.component(.weekday, from: date) - 1
-        let weekday = (0..<weekdayNames.count).contains(weekdayIndex) ? weekdayNames[weekdayIndex] : ""
-        let hour = calendar.component(.hour, from: date)
-        let minute = calendar.component(.minute, from: date)
-        let days = Int(interval / 86400)
-
-        if days < 7 {
-            return String(format: "%@ %02d:%02d 重置", weekday, hour, minute)
+        // 周额度 / 跨天周期：直接显示“还剩 X 天 Y 小时重置”
+        if remHours == 0 {
+            return "还剩 \(days) 天重置"
         } else {
-            let month = calendar.component(.month, from: date)
-            let day = calendar.component(.day, from: date)
-            return String(format: "%d月%d日 %02d:%02d 重置", month, day, hour, minute)
+            return "还剩 \(days) 天 \(remHours) 小时重置"
         }
     }
 

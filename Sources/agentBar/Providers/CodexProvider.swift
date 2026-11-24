@@ -346,6 +346,8 @@ struct CodexProvider: QuotaProvider {
             return "5 小时额度"
         } else if abs(minutes - 10080) <= 120 {
             return "周额度"
+        } else if minutes >= 25 * 1440 {
+            return "月度额度"
         } else if minutes >= 1440 {
             let days = Int(round(minutes / 1440.0))
             return "\(days) 天额度"

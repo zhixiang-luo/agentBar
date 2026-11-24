@@ -35,7 +35,7 @@ enum AgentBarLauncher {
             case .active:
                 let items = snap.windows.map { win -> String in
                     let val = win.formattedPrimaryValue(showUsed: false)
-                    let reset = QuotaTimeFormatter.resetDescription(for: win.resetsAt) ?? "无重置时间"
+                    let reset = QuotaTimeFormatter.resetDescription(for: win.resetsAt, windowLabel: win.label) ?? "无重置时间"
                     return "\(win.label)=\(val)（\(reset)）"
                 }.joined(separator: " | ")
                 print("[已同步] \(snap.name)（\(snap.badge) · \(snap.sourceLabel)）：\(items)")

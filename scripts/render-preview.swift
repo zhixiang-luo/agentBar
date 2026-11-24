@@ -197,8 +197,8 @@ func drawPanelShowcase(originX: CGFloat, isDark: Bool) {
             badge: "Plus 订阅",
             dotHex: 0x10A37F,
             windows: [
-                SampleWindow(label: "5 小时额度", valueText: "剩余 95%", progress: 0.95, colorHex: greenHex, resetText: "1 小时 57 分钟后重置"),
-                SampleWindow(label: "周额度", valueText: "剩余 20%", progress: 0.20, colorHex: redHex, resetText: "周三 22:33 重置")
+                SampleWindow(label: "5 小时额度", valueText: "剩余 95%", progress: 0.95, colorHex: greenHex, resetText: "还剩 1 小时 57 分钟重置"),
+                SampleWindow(label: "周额度", valueText: "剩余 20%", progress: 0.20, colorHex: redHex, resetText: "还剩 1 天 9 小时重置")
             ]
         ),
         SampleCard(
@@ -206,8 +206,8 @@ func drawPanelShowcase(originX: CGFloat, isDark: Bool) {
             badge: "官方 CLI",
             dotHex: 0x3B82F6,
             windows: [
-                SampleWindow(label: "5 小时额度", valueText: "剩余 61%", progress: 0.61, colorHex: greenHex, resetText: "3 小时 4 分钟后重置"),
-                SampleWindow(label: "周额度", valueText: "剩余 90%", progress: 0.90, colorHex: greenHex, resetText: "周二 08:50 重置")
+                SampleWindow(label: "5 小时额度", valueText: "剩余 61%", progress: 0.61, colorHex: greenHex, resetText: "还剩 3 小时 4 分钟重置"),
+                SampleWindow(label: "周额度", valueText: "剩余 90%", progress: 0.90, colorHex: greenHex, resetText: "还剩 6 天 19 小时重置")
             ]
         ),
         SampleCard(

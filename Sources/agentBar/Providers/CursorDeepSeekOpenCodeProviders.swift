@@ -143,12 +143,19 @@ struct CursorProvider: QuotaProvider {
         let budget = max(config.cursorMonthlyBudgetUSD, 1.0)
         let usedPct = min(max((spentUSD / budget) * 100.0, 0), 100)
 
+        let nextMonthStart: Date? = {
+            let cal = Calendar.current
+            let now = Date()
+            guard let startOfMonth = cal.date(from: cal.dateComponents([.year, .month], from: now)) else { return nil }
+            return cal.date(byAdding: .month, value: 1, to: startOfMonth)
+        }()
+
         return [
             QuotaWindow(
                 id: "cursor-monthly",
                 label: "本月预算额度",
                 kind: .percentage(usedPercent: usedPct),
-                resetsAt: nil,
+                resetsAt: nextMonthStart,
                 detail: String(format: "已消费 $%.2f / $%.0f", spentUSD, budget)
             )
         ]

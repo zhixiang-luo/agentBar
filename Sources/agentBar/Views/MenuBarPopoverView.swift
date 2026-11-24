@@ -575,7 +575,7 @@ struct QuotaWindowRowView: View {
     }
 
     private var metadataLine: String? {
-        let reset = QuotaTimeFormatter.resetDescription(for: window.resetsAt)
+        let reset = QuotaTimeFormatter.resetDescription(for: window.resetsAt, windowLabel: window.label)
         switch (reset, window.detail) {
         case let (r?, d?) where !d.isEmpty:
             return "\(r) · \(d)"
